@@ -1,0 +1,181 @@
+pipeline
+    agent any{
+            environment {
+                SCANNER_HOME=tool 'sonarq-scanner'
+                AWS_DEFAULT_REGION = 'ap-south-1'
+                AWS_ACCOUNT_ID = credentials('ACCOUNT_ID')
+                AWS_ECR_REPO_NAME = 'backend-img'
+                REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
+            }
+
+        stages {
+
+
+            stage('Checkout from github') {
+                steps {
+                url: ' https://github.com/Samiksha1002/capstone-project.git  '
+            }
+            }
+
+        #######################################################################
+
+
+            stage('SonarQube Analysis') {
+                steps {
+                    dir('Application-Code/backend'){
+                        withSonarQubeEnv('sonar-server') {
+                            sh ''' $SCANNER_HOME/bin/sonarq-scanner \
+                            -Dsonar.projectKey=capstone-project-backend \
+                            -Dsonar.projectName=capstone-project-backend  '''
+                        }
+                    }
+                }
+            }
+            
+            #################################
+
+
+            stage('Quality Gate Check') {
+            steps {
+                script {
+                    // Wait for SonarQube to finish analysis and fetch Quality Gate result
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                        }
+                    }
+                }
+
+            post {
+                success {
+                    echo "🎉 SonarQube analysis passed and Quality Gate cleared!"
+                }
+                failure {
+                    echo "❌ SonarQube Quality Gate failed! Check SonarQube dashboard for details."
+                }
+            }
+
+            
+
+
+        #######################################################################
+
+
+            stage('OWASP Dependency-Check Scan') {
+            steps {
+                dir('Application-Code/backend') {
+                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', 
+                    odcInstallation: 'owasp-dependency-check'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+
+                    /*--disableYarnAudit --disableNodeAudit'  - might wanna add for backend*/ 
+                }
+            }
+        }
+
+       ###########################################################  
+
+
+       #######################################################################
+
+
+            stage('Trivy File Scan') {
+            steps {
+                dir('Application-Code/backend') {
+                    sh 'trivy fs . > trivyfs.txt'
+                }
+            }
+        }
+
+       ###########################################################  
+
+
+
+       #######################################################################
+
+
+            stage("Docker Image Build") {
+                steps {
+                    dir('Application-Code/backend') {
+                        sh 'docker system prune -f'
+                        sh "
+                            docker build -t ${AWS_ECR_REPO_NAME} .
+                        "
+                    }
+                }
+            }
+
+       ###########################################################  
+
+            stage("ECR Image Pushing") {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                credentialsId: 'aws-credentials']]){
+                script {
+                        sh 'aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}'
+                        sh 'docker tag ${AWS_ECR_REPO_NAME} ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}'
+                        sh 'docker push ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}'
+                }
+            }
+            }
+        }
+
+        
+       #######################################################################
+
+
+            stage("Scan the Image"){
+                    steps {
+                        sh """
+                        echo "=====Scanning Image Started======"
+                        trivy image ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER} > trivyimage.txt
+                        echo "=====Scanning Completed========"
+                        """
+                    }
+                    }
+       ###########################################################  
+
+
+
+       #######################################################################
+
+
+            stage('Checkout from github') {
+                steps {
+                url: '  https://github.com/Samiksha1002/capstone-project.git '
+            }
+            }
+
+       ###########################################################  
+
+
+       #######################################################################
+
+
+            stage('Update Deployment file') {
+            environment {
+                GIT_REPO_NAME = "capstone-project"
+                GIT_USER_NAME = "Samiksha1002"
+            }
+            steps {
+                dir('backend/k8s') {
+                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                        sh '''
+                            git config user.email "samikshanikhar@gmail.com"
+                            git config user.name "Samiksha1002"
+                            BUILD_NUMBER=${BUILD_NUMBER}
+                            echo $BUILD_NUMBER
+                            imageTag=$(grep -oP '(?<=backend:)[^ ]+' deployment.yaml)
+                            echo $imageTag
+                            sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" deployment.yaml
+                            git add deployment.yaml
+                            git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
+                            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                        '''
+                    }
+                }
+            }
+        }
+       ###########################################################  
+        }
+
+
+    }
