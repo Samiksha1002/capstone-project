@@ -28,9 +28,13 @@ pipeline{
                 steps {
                     dir('Application-Code/backend'){
                         withSonarQubeEnv('sonar-server') {
-                            sh ''' $SCANNER_HOME/bin/sonarq-scanner \
-                            -Dsonar.projectKey=capstone-project-backend \
-                            -Dsonar.projectName=capstone-project-backend  '''
+                                sh '''
+                                    sonar-scanner \
+                                    -Dsonar.projectKey=capstone-project \
+                                    -Dsonar.projectName=capstone-backend \
+                                    -Dsonar.sources=.
+                                '''
+                            
                         }
                     }
                 }
