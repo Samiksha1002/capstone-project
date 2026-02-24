@@ -1,20 +1,21 @@
 pipeline
-    agent any{
-            environment {
+    agent any
+
+    environment {
                 SCANNER_HOME=tool 'sonarq-scanner'
                 AWS_DEFAULT_REGION = 'ap-south-1'
                 AWS_ACCOUNT_ID = credentials('ACCOUNT_ID')
                 AWS_ECR_REPO_NAME = 'backend-img'
                 REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
-            }
+    }
 
-        stages {
+    stages {
 
 
             stage('Checkout from github') {
                 steps {
-                url: ' https://github.com/Samiksha1002/capstone-project.git  '
-            }
+                        git url: 'https://github.com/Samiksha1002/capstone-project.git'
+                        }
             }
 
        /* #######################################################################*/
@@ -44,17 +45,7 @@ pipeline
                     }
                 }
 
-            post {
-                success {
-                    echo "🎉 SonarQube analysis passed and Quality Gate cleared!"
-                }
-                failure {
-                    echo "❌ SonarQube Quality Gate failed! Check SonarQube dashboard for details."
-                }
-            }
-
-            
-
+        
 
         /* #######################################################################*/
 
@@ -141,7 +132,7 @@ pipeline
 
             stage('Checkout from github') {
                 steps {
-                url: '  https://github.com/Samiksha1002/capstone-project.git '
+                git url: 'https://github.com/Samiksha1002/capstone-project.git'
             }
             }
 
@@ -179,4 +170,4 @@ pipeline
         }
 
 
-    }
+    
