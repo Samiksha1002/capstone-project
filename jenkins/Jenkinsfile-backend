@@ -19,17 +19,28 @@ pipeline{
                     credentialsId: 'github-token'
                 }
         }
+        
 
        /* #######################################################################*/
 
 
-            stage('SonarQube Analysis') {
+           /* stage('SonarQube Analysis') {
                 steps {
                     dir('Application-Code/backend'){
                         withSonarQubeEnv('sonar-server') {
                             sh ''' $SCANNER_HOME/bin/sonarq-scanner \
                             -Dsonar.projectKey=capstone-project-backend \
                             -Dsonar.projectName=capstone-project-backend  '''
+                        }
+                    }
+                }
+            }
+            */
+            stage('SonarQube Analysis') {
+                steps {
+                    dir('Application-Code/backend') {
+                        withSonarQubeEnv('sonar-server') {
+                            sh 'sonar-scanner -Dsonar.projectKey=capstone-project-backend -Dsonar.projectName=capstone-project-backend'
                         }
                     }
                 }
