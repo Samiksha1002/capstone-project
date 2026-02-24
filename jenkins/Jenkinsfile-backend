@@ -14,9 +14,11 @@ pipeline{
 
             stage('Checkout from github') {
                 steps {
-                        git url: 'https://github.com/Samiksha1002/capstone-project.git'
-                        }
-            }
+                    git branch: 'main', 
+                    url: 'https://github.com/Samiksha1002/capstone-project.git',
+                    credentialsId: 'github-token'
+                }
+        }
 
        /* #######################################################################*/
 
