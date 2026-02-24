@@ -2,7 +2,7 @@ pipeline{
     agent any
 
     environment {
-                SCANNER_HOME=tool 'sonarq-scanner'
+                SCANNER_HOME=tool 'sonar-scanner'
                 AWS_DEFAULT_REGION = 'ap-south-1'
                 AWS_ACCOUNT_ID = credentials('AWS_ACCOUNT_ID')
                 AWS_ECR_REPO_NAME = 'backend-img'
