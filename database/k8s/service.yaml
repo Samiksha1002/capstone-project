@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+  namespace: mern-app
+spec:
+  clusterIP: None
+  selector:
+    app: mongo-database
+  ports:
+  - name: db-service
+    port: 27017
+
+
+

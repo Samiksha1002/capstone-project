@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+  namespace: mern-app
+spec:
+  serviceName: db-service
+  replicas: 1 # using 3 replicas as using replica set for mongoDB , between the 3 , elected one will be primary and other two will be secondary and if primary goes down one of the secondary will be elected as primary and other one will be secondary
+  selector:
+    matchLabels:
+      app: mongo-database
+  template:
+    metadata:
+      labels:
+        app: mongo-database
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:4.4
+        command: 
+          - mongod
+        args:
+        #  - "--replSet"
+        #  - "rs0"
+          - "--bind_ip_all"
+         # - "--auth"
+         # - "--keyFile"
+         # - "/etc/mongo-keyfile/keyfile"
+      
+        ports:
+        - containerPort: 27017    
+        envFrom:
+          - secretRef:
+              name: mongo-secret
+
+        volumeMounts:
+            - name: db-pvc
+              mountPath: /data/db
+
+          #  - name: mongo-keyfile
+          #    mountPath: /etc/mongo-keyfile
+          #    readOnly: true
+              
+    #  volumes:
+    #    - name: mongo-keyfile
+    #      secret:
+    #        secretName: mongo-keyfile
+    #        defaultMode: 0400
+
+  
+  volumeClaimTemplates:
+  - metadata:
+      name: db-pvc
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: gp2 #standard  # Use the appropriate storage class for your cluster
+      resources:
+        requests:
+          storage: 10Gi 
+    

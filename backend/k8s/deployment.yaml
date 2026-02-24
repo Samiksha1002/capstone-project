@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment # Deployment for backend application
+  namespace: mern-app
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+      app: backend # Matching pods with label app: backend
+  template:
+    metadata:
+      labels:
+        app: backend # Labeling pods with app: backend
+    spec:
+      containers:
+      - name: backend-container
+        image:  821738008755.dkr.ecr.ap-south-1.amazonaws.com/backend-img
+          #backend-image:1
+        ports:              
+        - containerPort: 3500 # Exposing container port 3500 for backend application
+        env:
+          - name: MONGO_CONN_STR 
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: MONGO_CONN_STR  # Referencing the MONGO_CONN_STR from the backend ConfigMap
+
+
+          - name: MONGO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: MONGO_USERNAME # Referencing the MONGO_USERNAME from the mongo-secret
+
+          - name: MONGO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: MONGO_PASSWORD # Referencing the MONGO_PASSWORD from the mongo-secret
+        
+        
+        livenessProbe: # Liveness probe to check if the application is running
+          httpGet:
+            path: /healthz
+            port: 3500
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        
+        readinessProbe: # Readiness probe to check if the application is ready to serve traffic
+          httpGet:
+            path: /ready
+            port: 3500
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+        
+        startupProbe: # Startup probe to check if the application has started successfully
+          httpGet:
+            path: /started
+            port: 3500
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          failureThreshold: 30
+      

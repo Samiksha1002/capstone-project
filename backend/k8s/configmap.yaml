@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-configmap
+  namespace: mern-app
+data:
+ MONGO_CONN_STR: mongodb://db-service:27017/todo?directConnection=true
+ #mongodb://database-0.db-service:27017,database-1.db-service:27017/todo?replicaSet=rs0
+ #mongodb://$(MONGO_USERNAME):$(MONGO_PASSWORD)@database-0.db-service:27017,database-1.db-service:27017,database-2.db-service:27017/todo?replicaSet=rs0&authSource=admin
+  #mongodb://username:password@host1,host2,host3/DATABASE_NAME?options         ----> normal structure for MongoDB connection string with replica set

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment # Deployment for frontend application
+  namespace: mern-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend # Matching pods with label app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend # Labeling pods with app: frontend
+    spec:
+      containers:
+      - name: frontend-container
+        image: 821738008755.dkr.ecr.ap-south-1.amazonaws.com/frontend-img   #frontend-image:1 
+        #frontend-image:1 # Using the latest frontend image avaialable in the container registry.
+        ports:
+        - containerPort: 3000 # Exposing container port 3000
+        envFrom:
+        - configMapRef:
+            name: frontend-configmap # Referencing the frontend ConfigMap
