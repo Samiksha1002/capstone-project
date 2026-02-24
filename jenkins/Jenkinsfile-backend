@@ -37,14 +37,19 @@ pipeline{
             }
             */
             stage('SonarQube Analysis') {
-                steps {
-                    dir('Application-Code/backend') {
-                        withSonarQubeEnv('sonar-server') {
-                            sh 'sonar-scanner -Dsonar.projectKey=capstone-project-backend -Dsonar.projectName=capstone-project-backend'
+                    steps {
+                        dir('Application-Code/backend') {
+                            withSonarQubeEnv('sonar-server') {
+                                sh '''
+                                sonar-scanner \
+                                  -Dsonar.projectKey=capstone-project \
+                                  -Dsonar.sources=. \
+                                  -Dsonar.projectName=capstone-backend
+                                '''
+                            }
                         }
                     }
                 }
-            }
             
             /* #######################################################################*/
 
