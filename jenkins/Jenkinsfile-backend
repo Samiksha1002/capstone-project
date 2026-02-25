@@ -114,12 +114,19 @@ pipeline{
                     steps {
                         script {
                             dir('Application-Code/backend') {
-                                sh "docker system prune -f"
-                                sh "docker build -t ${AWS_ECR_REPO_NAME} ."
+                                sh 'ls -la'
+                                sh """
+                                    echo "======== Building the Docker Image ============"
+                                    echo "IMAGE Name is - ${AWS_ECR_REPO_NAME}"
+                                    echo "Build Number is - ${BUILD_NUMBER}"
+                                    docker build -t ${AWS_ECR_REPO_NAME}:${BUILD_NUMBER} .
+                                    echo "====== Building Image Completed ====="
+                                """
                             }
                         }
                     }
                 }
+
 
       /* #######################################################################*/
 
