@@ -111,21 +111,33 @@ pipeline{
 
 
             stage("Docker Image Build") {
-                    steps {
-                        script {
-                            dir('Application-Code/backend') {
-                                sh 'ls -la'
-                                sh """
-                                    echo "======== Building the Docker Image ============"
-                                    echo "IMAGE Name is - ${AWS_ECR_REPO_NAME}"
-                                    echo "Build Number is - ${BUILD_NUMBER}"
-                                    docker build -t ${AWS_ECR_REPO_NAME}:${BUILD_NUMBER} .
-                                    echo "====== Building Image Completed ====="
-                                """
-                            }
-                        }
-                    }
-                }
+    steps {
+        script {
+            dir('Application-Code/backend') {
+                // List files to verify Dockerfile exists
+                sh 'ls -la'
+
+                // Build Docker image
+                sh """
+                    echo "======== Building the Docker Image ============"
+                    echo "IMAGE Name is - ${AWS_ECR_REPO_NAME}"
+                
+
+                    # Check if Dockerfile exists
+                    if [ ! -f Dockerfile ]; then
+                        echo "ERROR: Dockerfile not found!"
+                        exit 1
+                    fi
+
+                    # Build the Docker image
+                    docker build -t ${AWS_ECR_REPO_NAME} .
+
+                    echo "====== Docker Image Build Completed ====="
+                """
+            }
+        }
+    }
+}
 
 
       /* #######################################################################*/
