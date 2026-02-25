@@ -36,7 +36,7 @@ pipeline{
                                 sh ''' sonar-scanner \
                                           -Dsonar.projectKey=capstone-project \
                                           -Dsonar.sources=. \
-                                          -Dsonar.host.url=http://localhost:9000 \
+                                          -Dsonar.host.url=http://172.22.195.41:9000 \
                                           -Dsonar.token=sqa_567a5d8b25911ef5f169810c22c7e3b3048aa0df '''
                                                                         
                             
