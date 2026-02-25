@@ -47,7 +47,7 @@ pipeline{
             */
             stage('SonarQube Analysis') {
                     steps {
-                        dir('Application-Code/backend') {
+                        dir('backend') {
                             withSonarQubeEnv('sonar-server') {
                                 sh '''
                                 sonar-scanner \
@@ -79,7 +79,7 @@ pipeline{
 
             stage('OWASP Dependency-Check Scan') {
             steps {
-                dir('Application-Code/backend') {
+                dir('backend') {
                     dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', 
                     odcInstallation: 'owasp-dependency-check'
                     dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
@@ -97,7 +97,7 @@ pipeline{
 
             stage('Trivy File Scan') {
             steps {
-                dir('Application-Code/backend') {
+                dir('backend') {
                     sh 'trivy fs . > trivyfs.txt'
                 }
             }
@@ -113,7 +113,7 @@ pipeline{
             stage("Docker Image Build") {
     steps {
         script {
-            dir('Application-Code/backend') {
+            dir('backend') {
                 // List files to verify Dockerfile exists
                 sh 'ls -la'
 
