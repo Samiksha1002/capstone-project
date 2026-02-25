@@ -116,7 +116,7 @@ pipeline{
                         
                         sh '''
                             docker system prune -f
-                            docker build -t ${AWS_ECR_REPO_NAME} .
+                            docker build -t ${AWS_ECR_REPO_NAME} -f Dockerfile .
                         '''
                     }
                 }
