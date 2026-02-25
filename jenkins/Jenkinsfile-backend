@@ -111,15 +111,15 @@ pipeline{
 
 
             stage("Docker Image Build") {
-            steps {
-                script {
-                    dir('Application-Code/backend') {
-                            sh 'docker system prune -f'
-                            sh 'docker build -t ${AWS_ECR_REPO_NAME} .'
+                    steps {
+                        script {
+                            dir('Application-Code/backend') {
+                                sh "docker system prune -f"
+                                sh "docker build -t ${AWS_ECR_REPO_NAME} ."
+                            }
+                        }
                     }
                 }
-            }
-        }
 
       /* #######################################################################*/
 
