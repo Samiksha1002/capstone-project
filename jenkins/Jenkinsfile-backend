@@ -61,27 +61,15 @@ pipeline{
         /* #######################################################################*/
 
 
-            stage('OWASP Dependency-Check Scan') {
-                    environment {
-                        NVD_API_KEY = credentials('nvd-api-key')
-                    }
-                    steps {
-                        dir('backend') {
-                            dependencyCheck additionalArguments: """
-                                --scan ./
-                                --format XML
-                                --format HTML
-                                --nvdApiKey ${NVD_API_KEY}
-                                --failOnCVSS 7
-                            """,
-                            odcInstallation: 'owasp-dependency-check'
-                
-                            dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-                        }
-                    }
+        
+                        stage('OWASP Dependency-Check Scan') {
+            steps {
+                dir('Application-Code/backend') {
+                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
-
-
+            }
+        }
        /* #######################################################################*/
 
 
