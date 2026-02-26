@@ -66,9 +66,8 @@ pipeline{
                 dir('backend') {
                     dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit',
                                     odcInstallation: 'owasp-dependency-check',
-                                    failBuildOnCVSS: '7'   // Fail build if vulnerabilities >= CVSS 7
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml',
-                                             reportFormat: 'ALL' // Publish XML, HTML, JSON reports
+                                    stopBuild: true   // Fail build if vulnerabilities are found
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
             }
         }
