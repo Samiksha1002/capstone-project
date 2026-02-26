@@ -196,27 +196,28 @@ pipeline{
             }
             steps {
                 dir('backend/k8s') {
-                   withCredentials([usernamePassword(
-                                    credentialsId: 'github-token',
-                                    usernameVariable: 'GIT_USERNAME',
-                                    passwordVariable: 'GITHUB_TOKEN'
-                                )]) {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'github-token',
+                        usernameVariable: 'GIT_USERNAME',
+                        passwordVariable: 'GITHUB_TOKEN'
+                    )]) {
                         sh '''
                             git config user.email "samikshanikhar@gmail.com"
                             git config user.name "Samiksha1002"
-                            BUILD_NUMBER=${BUILD_NUMBER}
-                            echo $BUILD_NUMBER
-                            imageTag=$(grep -oP '(?<=backend:)[^ ]+' deployment.yaml)
-                            echo $imageTag
-                            sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" deployment.yaml
+            
+                            echo "Build Number: $BUILD_NUMBER"
+            
+                            # Update image tag in deployment.yaml
+                            sed -i "s|\\(image:.*:\\).*|\\1${BUILD_NUMBER}|" deployment.yaml
+            
                             git add deployment.yaml
-                            git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
-                            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main7
+                            git commit -m "Update image to version ${BUILD_NUMBER}" || echo "No changes"
+            
+                            git push https://${GIT_USERNAME}:${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main7
                         '''
                     }
                 }
             }
-        }
       /* #######################################################################*/  
         }
 }
