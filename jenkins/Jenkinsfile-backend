@@ -72,17 +72,12 @@ pipeline{
         
                         stage('OWASP Dependency-Check Scan') {
                                 steps {
-                                    dir('backend') {
+                                    dir('Application-Code/backend') {
                                         withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
-                                            sh '''
-                                            /var/lib/jenkins/tools/org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation/owasp-dependency-check/bin/dependency-check.sh \
-                                              --scan ./ \
-                                              --format XML \
-                                              --out . \
-                                              --nvdApiKey $NVD_API_KEY \
-                                              --disableYarnAudit \
-                                              --disableNodeAudit
-                                            '''
+                                            dependencyCheck(
+                                                additionalArguments: '--scan ./ --nvdApiKey $NVD_API_KEY --disableYarnAudit --disableNodeAudit',
+                                                odcInstallation: 'owasp-dependency-check'
+                                            )
                                         }
                                         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                                     }
