@@ -176,12 +176,13 @@ pipeline{
       /* #######################################################################*/
 
 
-            stage('Checkout code for deployment') {
+           stage('Checkout code for deployment') {
                 steps {
-                git url: 'https://github.com/Samiksha1002/capstone-project.git'
+                    git branch: 'main',
+                        credentialsId: 'github-token',
+                        url: 'https://github.com/Samiksha1002/capstone-project.git'
+                }
             }
-            }
-
      /* #######################################################################*/
 
 
