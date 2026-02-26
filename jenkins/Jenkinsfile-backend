@@ -62,15 +62,24 @@ pipeline{
 
 
             stage('OWASP Dependency-Check Scan') {
-            steps {
-                dir('backend') {
-                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit',
-                                    odcInstallation: 'owasp-dependency-check',
-                                    stopBuild: true   // Fail build if vulnerabilities are found
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                    environment {
+                        NVD_API_KEY = credentials('nvd-api-key')
+                    }
+                    steps {
+                        dir('backend') {
+                            dependencyCheck additionalArguments: """
+                                --scan ./
+                                --format XML
+                                --format HTML
+                                --nvdApiKey ${NVD_API_KEY}
+                                --failOnCVSS 7
+                            """,
+                            odcInstallation: 'owasp-dependency-check'
+                
+                            dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                        }
+                    }
                 }
-            }
-        }
 
 
        /* #######################################################################*/
