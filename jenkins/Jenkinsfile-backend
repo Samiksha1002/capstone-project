@@ -28,23 +28,6 @@ pipeline{
        /* #######################################################################*/
 
 
-           /* stage('SonarQube Analysis') {
-                steps {
-                    dir('Application-Code/backend'){
-                        withSonarQubeEnv('sonar-server') {
-                            
-                                sh ''' sonar-scanner \
-                                          -Dsonar.projectKey=capstone-project \
-                                          -Dsonar.sources=. \
-                                          -Dsonar.host.url=http://localhost:9000 \
-                                          -Dsonar.token=sqa_567a5d8b25911ef5f169810c22c7e3b3048aa0df '''
-                                                                        
-                            
-                        }
-                    }
-                }
-            }
-            */
             stage('SonarQube Analysis') {
                     steps {
                         dir('backend') {
@@ -81,14 +64,15 @@ pipeline{
             stage('OWASP Dependency-Check Scan') {
             steps {
                 dir('backend') {
-                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', 
-                    odcInstallation: 'owasp-dependency-check'
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-
-                    /*--disableYarnAudit --disableNodeAudit'  - might wanna add for backend*/ 
+                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit',
+                                    odcInstallation: 'owasp-dependency-check',
+                                    failBuildOnCVSS: '7'   // Fail build if vulnerabilities >= CVSS 7
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml',
+                                             reportFormat: 'ALL' // Publish XML, HTML, JSON reports
                 }
             }
         }
+
 
        /* #######################################################################*/
 
