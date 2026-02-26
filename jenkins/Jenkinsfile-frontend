@@ -42,7 +42,7 @@ pipeline{
                             withSonarQubeEnv('sonar-server') {
                                 sh '''
                                 sonar-scanner \
-                                  -Dsonar.projectKey=capstone-project \
+                                  -Dsonar.projectKey=capstone-frontend \
                                   -Dsonar.sources=. \
                                   -Dsonar.projectName=capstone-frontend \
                                   -Dsonar.host.url=http://localhost:9000 \
