@@ -1,7 +1,11 @@
 server:
   persistentVolume:
+    enabled: true
     storageClass: gp2
 
+
 alertmanager:
-  persistentVolume:
+  enabled: true
+  persistence:
+    enabled: true
     storageClass: gp2
