@@ -5,7 +5,7 @@ metadata:
   namespace: mern-app
 spec:
   serviceName: db-service
-  replicas: 1 # using 3 replicas as using replica set for mongoDB , between the 3 , elected one will be primary and other two will be secondary and if primary goes down one of the secondary will be elected as primary and other one will be secondary
+  replicas: 2 # using 3 replicas as using replica set for mongoDB , between the 3 , elected one will be primary and other two will be secondary and if primary goes down one of the secondary will be elected as primary and other one will be secondary
   selector:
     matchLabels:
       app: mongo-database
