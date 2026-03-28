@@ -1,0 +1,64 @@
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: mongo-database
+  namespace: mern-app
+spec:
+  members: 10                             # creating a replica set with 3 members. 
+  type: ReplicaSet  
+  version: "6.0.5"                           # this is the version of mongodb that will be used. same as  the version used in the statefulset.yaml file .
+  security:
+    authentication:
+      modes: ["SCRAM"]                       # using SCRAM auth.mode so that when user log in it need to provide username and password .
+  users:
+    - name: Sam                       # this is the name of the user that will be created in the database .
+      db: admin                              # this is where the database will be created and the user will be assigned to this database.
+
+      
+      # This tells the operator to use YOUR existing secret
+      passwordSecretRef: 
+        name: mongo-secret                   #  from where secret will be accessed.
+
+      roles:                                 # This is the role that will be assigned to the user.
+        - name: root                         #this  give the user full access to the database.
+          db: admin                          # this is the database where the role will be assigned. in this case it is admin database.
+
+
+      scramCredentialsSecretName: my-scram-secret # Here it will save  SCRAM credentials for this user. use this secret to access the database with the specified user.
+  statefulSet:                               # this is the configuration for the statefulset that will be created by the operator to manage the mongodb replica set.
+    spec: 
+      template:
+        spec:
+          containers:
+          - name: mongod  # The Operator looks for this name to apply overrides
+            resources:
+              requests:
+                cpu: "50m"
+                memory: "256Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"    
+          - name: mongodb-agent
+            resources:
+              requests:
+                cpu: "100m"      # Lowered from the default 500m
+                memory: "128Mi" 
+      volumeClaimTemplates:
+      - metadata:
+          name: data-volume
+        spec:
+          accessModes: [ "ReadWriteOnce" ]
+          storageClassName:  gp2  # using gp2 as storage class for EBS volume in AWS  . so it helps create EBS volume and attach to the pod .
+          resources:
+            requests:
+              storage: 10Gi
+              
+              
+      - metadata:
+          name: logs-volume # this is the name of the volume that will be used to store the logs of the mongodb.
+        spec:
+          storageClassName: gp2
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi                                              # The operator manages the keyfile automatically for auth

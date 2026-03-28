@@ -89,8 +89,8 @@ resource "aws_eks_node_group" "node_group" {
   disk_size      = 50
 
   scaling_config {
-    desired_size = 2
-    max_size     = 2
+    desired_size = 4
+    max_size     = 6
     min_size     = 2
   }
 
@@ -101,6 +101,8 @@ resource "aws_eks_node_group" "node_group" {
   ]
   tags = {
    Name = "eks-node-group"
+   "k8s.io/cluster-autoscaler/enabled" = "true"
+   "k8s.io/cluster-autoscaler/${aws_eks_cluster.eks_cluster.name}" = "true"
   }
 }
 

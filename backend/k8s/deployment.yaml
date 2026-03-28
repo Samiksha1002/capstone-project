@@ -15,11 +15,14 @@ spec:
     spec:
       containers:
       - name: backend-container
-        image:  821738008755.dkr.ecr.ap-south-1.amazonaws.com/backend-img
+        image: 821738008755.dkr.ecr.ap-south-1.amazonaws.com/backend-img
           #backend-image:1
         ports:              
         - containerPort: 3500 # Exposing container port 3500 for backend application
         env:
+          - name: USE_DB_AUTH
+            value: "true"
+            
           - name: MONGO_CONN_STR 
             valueFrom:
               configMapKeyRef:
@@ -28,16 +31,17 @@ spec:
 
 
           - name: MONGO_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: mongo-secret
-                key: MONGO_USERNAME # Referencing the MONGO_USERNAME from the mongo-secret
+            value: Sam
+            #valueFrom:
+              #secretKeyRef:
+              #  name: mongo-secret
+              #  key: MONGO_USERNAME # Referencing the MONGO_USERNAME from the mongo-secret
 
           - name: MONGO_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: mongo-secret
-                key: MONGO_PASSWORD # Referencing the MONGO_PASSWORD from the mongo-secret
+                key: password #MONGO_PASSWORD # Referencing the MONGO_PASSWORD from the mongo-secret
         
         
         livenessProbe: # Liveness probe to check if the application is running

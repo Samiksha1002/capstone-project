@@ -5,7 +5,7 @@ metadata:
   namespace: mern-app
 spec:
   serviceName: db-service
-  replicas: 2 # using 3 replicas as using replica set for mongoDB , between the 3 , elected one will be primary and other two will be secondary and if primary goes down one of the secondary will be elected as primary and other one will be secondary
+  replicas: 3 # using 3 replicas as using replica set for mongoDB , between the 3 , elected one will be primary and other two will be secondary and if primary goes down one of the secondary will be elected as primary and other one will be secondary
   selector:
     matchLabels:
       app: mongo-database
@@ -14,38 +14,45 @@ spec:
       labels:
         app: mongo-database
     spec:
+      #securityContext:
+      #  fsGroup: 999 # using 999 as mongoDB runs as user with UID 999 and GID 999 and this will ensure that the data stored in the volume is owned by the mongoDB user and group and it will have the necessary permissions to read and write data to the volume
+      #  runAsUser: 999
       containers:
-      - name: mongo
+      - name: database  
         image: mongo:4.4
-        command: 
-          - mongod
+
+        
+       # command:
+       # - mongod
         args:
-        #  - "--replSet"
-        #  - "rs0"
+          - "--replSet=rs0"
           - "--bind_ip_all"
-         # - "--auth"
-         # - "--keyFile"
-         # - "/etc/mongo-keyfile/keyfile"
-      
+          #- "--auth"
+          #- "--keyFile=/etc/mongo-keyfile/keyfile"
+
+
         ports:
-        - containerPort: 27017    
+        - containerPort: 27017 
         envFrom:
           - secretRef:
-              name: mongo-secret
-
+              name: mongo-secret   
+       
         volumeMounts:
             - name: db-pvc
               mountPath: /data/db
 
-          #  - name: mongo-keyfile
-          #    mountPath: /etc/mongo-keyfile
-          #    readOnly: true
+        #    - name: mongo-keyfile
+        #      mountPath: /etc/mongo-keyfile
+        #      readOnly: true
               
-    #  volumes:
-    #    - name: mongo-keyfile
-    #      secret:
-    #        secretName: mongo-keyfile
-    #        defaultMode: 0400
+      #volumes:
+      #  - name: mongo-keyfile
+      #    secret:
+      #      secretName: mongo-keyfile
+      #      defaultMode: 0400
+      #      items:
+      #        - key: keyfile
+      #          path: keyfile
 
   
   volumeClaimTemplates:
@@ -53,7 +60,7 @@ spec:
       name: db-pvc
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: gp2 #standard  # Use the appropriate storage class for your cluster
+      storageClassName:  gp2  # using gp2 as storage class for EBS volume in AWS  . so it helps create EBS volume and attach to the pod when it is scheduled on a node and when the pod is deleted the EBS volume will be deleted as well
       resources:
         requests:
           storage: 10Gi 

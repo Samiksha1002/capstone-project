@@ -178,3 +178,61 @@ resource "aws_iam_role_policy_attachment" "alb_attach" {
   role       = aws_iam_role.alb_irsa_role.name
   policy_arn = aws_iam_policy.alb_controller_policy.arn
 }
+
+
+##############################################################################################################
+##cluster autoscaler iam role
+
+resource "aws_iam_policy" "cluster_autoscaler" {
+  name = "cluster-autoscaler-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeLaunchTemplateVersions"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "cluster_autoscaler_role" { #irsa role for cluster autoscaler
+  name = "cluster-autoscaler-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.eks_oidc.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub" = "system:serviceaccount:kube-system:cluster-autoscaler-aws-cluster-autoscaler"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name = "cluster-autoscaler-role"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_autoscaler_attach" {
+  role       = aws_iam_role.cluster_autoscaler_role.name
+  policy_arn = aws_iam_policy.cluster_autoscaler.arn
+}
+
