@@ -4,7 +4,7 @@ metadata:
   name: backend-deployment # Deployment for backend application
   namespace: mern-app
 spec:
-  replicas: 0
+  replicas: 2
   selector: 
     matchLabels:
       app: backend # Matching pods with label app: backend
