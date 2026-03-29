@@ -4,7 +4,7 @@ metadata:
   name: mongo-database
   namespace: mern-app
 spec:
-  members: 10                             # creating a replica set with 3 members. 
+  members: 3                             # creating a replica set with 3 members. 
   type: ReplicaSet  
   version: "6.0.5"                           # this is the version of mongodb that will be used. same as  the version used in the statefulset.yaml file .
   security:
